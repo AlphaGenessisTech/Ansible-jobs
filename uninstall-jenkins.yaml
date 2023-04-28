@@ -1,0 +1,25 @@
+---
+- name: Uninstall-Jenkins
+  hosts: app
+  become: true
+  gather_facts: false
+  
+  tasks:
+    - name: Uninstall Jenkins
+      package: 
+        name: jenkins
+        state: absent
+    - name: remove jks file
+      file:
+        path: /var/lib/jenkins
+        state: absent
+
+    - name: Uninstall Docker
+      package: 
+        name: docker
+        state: absent
+        
+    - name: remove docker file
+      file:
+        path: /etc/docker
+        state: absent

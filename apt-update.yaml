@@ -1,0 +1,21 @@
+---
+- name: Update Ubuntu OS
+  hosts: web
+  become: yes
+  tasks:
+  - name: Update package list
+    apt:
+      update_cache: yes
+
+  - name: Upgrade installed packages
+    apt:
+      upgrade: yes
+      autoremove: yes
+
+  - name: Upgrade kernel
+    apt:
+      upgrade: dist
+
+  - name: Clean up unnecessary packages
+    apt:
+      autoremove: yes

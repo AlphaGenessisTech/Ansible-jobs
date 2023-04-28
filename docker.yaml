@@ -1,0 +1,45 @@
+- name: Install Docker on Jenkins server
+  hosts: app
+  become: true
+  
+  pre_tasks:
+    - name: Install Docker dependencies
+      yum:
+        name:
+          - wget
+          - yum-utils
+          - device-mapper-persistent-data
+          - lvm2
+          
+          
+        state: present
+  tasks:
+    - name: Add Docker repository
+      yum_repository:
+        name: docker
+        description: Docker CE Repository
+        baseurl: https://download.docker.com/linux/centos/docker-ce.repo
+        gpgcheck: yes
+        gpgkey: https://download.docker.com/linux/centos/gpg
+        enabled: yes
+
+    - name: Install Docker
+      yum:
+        name:
+          - docker-ce
+          - containerd.io
+          - docker-compose-plugin
+          - docker-ce-cli
+        state: present
+    - name:     
+
+    - name: Add Jenkins user to Docker group
+      shell: usermod -aG docker jenkins
+
+    - name: Confirm Docker is running
+      shell: docker ps
+      register: docker_output
+
+    - name: print docker output
+      debug: 
+        var: docker_output.stdout

@@ -1,0 +1,101 @@
+- name: Install Jenkins and Docker
+  hosts: app
+  become: true
+   
+  vars:
+     jenkins_admin_password: "mysecretpassword"   # Replace with your own password
+  pre_tasks:
+    - name: Install Docker dependencies
+      apt:
+        name:
+          - curl
+          - wget
+          - gnupg
+          - ca-certificates
+          
+        state: present
+  tasks:
+    - name: Add key
+      
+      apt_key: 
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository
+      apt_repository:
+    
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ansible_distribution_release}} stable
+        state: present
+        
+      
+
+    - name: Install Docker
+      apt:
+        name: docker-ce
+        state: present
+
+    - name: Start and enable Docker service
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+
+    - name: Confirm Docker is running
+      shell: docker ps
+      register: docker_output
+
+    - name: print docker output
+      debug: 
+        var: docker_output.stdout
+
+  
+    - name: Add Jenkins apt key
+      apt_key:
+        url: https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key
+        state: present
+
+    - name: Add Jenkins apt repository
+      apt_repository:
+        repo: deb https://pkg.jenkins.io/debian-stable binary/
+        state: present
+        filename: jenkins
+        
+
+    - name: Install Jenkins and its dependencies
+      apt:
+        name:
+          - openjdk-11-jdk
+          - jenkins
+        state: present
+
+    - name: start jenkins
+      systemd:
+        name: jenkins
+        enabled: true
+        state: started
+
+    - name: init password jenkins
+      shell: cat /var/lib/jenkins/secrets/initialAdminPassword
+      changed_when: false
+      register: result
+
+    - name: print init password jenkins
+      debug:
+        var: result.stdout
+
+    - name: Add Jenkins user
+      user:
+        name: jenkins
+        state: present
+        createhome: true
+
+    - name: Add Jenkins user to sudoers
+      lineinfile:
+        dest: /etc/sudoers
+        state: present
+        line: 'jenkins ALL=(ALL) NOPASSWD:ALL'
+  
+    - name: Add jenkins to docker group
+      shell: usermod -aG docker jenkins
+    

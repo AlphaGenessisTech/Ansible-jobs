@@ -1,0 +1,14 @@
+- name: Update Server Playbook
+  hosts: app
+  become: yes
+
+  tasks:
+    - name: Update package cache
+      yum:
+        update_cache: yes
+
+    - name: Upgrade packages
+      yum:
+        update_only: true
+        autoremove: yes
+        

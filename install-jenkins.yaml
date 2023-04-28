@@ -1,0 +1,39 @@
+---
+- name: Install Jenkins
+  hosts: app
+  become: true
+  
+
+  vars:
+    jenkins_admin_password: "mysecretpassword"   # Replace with your own password
+
+  tasks:
+    - name: Add Jenkins RPM key
+      rpm_key:
+        key: https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+        state: present
+
+    - name: Add Jenkins YUM repository
+      get_url:
+        url: https://pkg.jenkins.io/redhat-stable/jenkins.repo
+        dest: /etc/yum.repos.d/jenkins.repo
+
+    - name: Install Jenkins and its dependencies
+      yum:
+        name:
+          - java-11-openjdk-devel
+          - jenkins
+        state: present
+    - name: start jenkins
+      systemd:
+        name: jenkins
+        enabled: true
+        state: started
+    - name: init password jenkin
+      shell: cat /var/lib/jenkins/secrets/initialAdminPassword
+      changed_when: false
+      register: result
+
+    - name: print init password jenkins
+      debug:
+        var: result.stdout

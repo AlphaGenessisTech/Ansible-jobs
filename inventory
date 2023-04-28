@@ -1,0 +1,33 @@
+# Define the 'app' group with the IP address of the app server
+[app]
+172.31.24.101
+
+# Define the 'web' group with the IP address of the web server
+[web]
+172.31.30.19
+
+# Define the 'web' group with the IP address of the web server
+[docker]
+172.31.22.206
+
+# Define a parent group called 'all' that includes both 'app' and 'web'
+[all:children]
+app
+web
+docker
+
+# Set a variable that applies to all hosts, specifying the SSH private key file to use
+[all:vars]
+ansible_ssh_private_key_file=dev-stage/tmp/ec2_key.pem
+
+# Set a variable that applies only to the 'app' group, specifying the SSH username to use
+[app:vars]
+ansible_user=ubuntu
+
+# Set a variable that applies only to the 'web' group, specifying the SSH username to use
+[web:vars]
+ansible_user=ubuntu
+
+# Set a variable that applies only to the 'app' group, specifying the SSH username to use
+[docker:vars]
+ansible_user=ec2-user
